@@ -1,20 +1,22 @@
 # -*- mode: python -*-
 
 block_cipher = None
+from kivy.tools.packaging.pyinstaller_hooks import get_deps_all, hookspath, runtime_hooks
 
 
 a = Analysis(['../testapp/main.py'],
              pathex=['.'],
              binaries=[],
              datas=[],
-             hiddenimports=[],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=['_tkinter', 'Tkinter', 'enchant', 'twisted'],
+             #hiddenimports=[],
+             hookspath=hookspath(),
+             runtime_hooks=runtime_hooks(),
+             #excludes=['_tkinter', 'Tkinter', 'enchant', 'twisted'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,
-             noarchive=False)
+             noarchive=False,
+             **get_deps_all())
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
