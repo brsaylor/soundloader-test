@@ -1,4 +1,6 @@
+import os
 import sys
+import json
 
 from kivy.app import App
 from kivy.core.audio import SoundLoader
@@ -10,6 +12,7 @@ class MainWindow(Widget):
     filename = StringProperty(sys.argv[1])
 
     def play_sound(self):
+        print(json.dumps(dict(os.environ), indent=4, sort_keys=True))
         sound = SoundLoader.load(self.filename)
         sound.play()
 
