@@ -1,12 +1,47 @@
 # -*- mode: python -*-
 
+import glob
+import os.path
+import re
+import subprocess
+
 block_cipher = None
 from kivy.tools.packaging.pyinstaller_hooks import get_deps_all, hookspath, runtime_hooks
 
 
+GST_PLUGINS_DIR = 'gst-plugins'
+
+
+def find_gst_plugin_path():
+    p = subprocess.Popen(
+        ['gst-inspect-1.0', 'coreelements'],
+        stdout=subprocess.PIPE,
+        universal_newlines=True
+    )
+    (stdoutdata, stderrdata) = p.communicate()
+
+    match = re.search(r'^\s*Filename\s+(\S+)', stdoutdata, re.MULTILINE)
+
+    if not match:
+        return None
+
+    return os.path.dirname(match.group(1))
+
+
+def get_gst_plugin_binaries():
+    plugin_path = find_gst_plugin_path()
+
+    binaries = []
+    for pattern in ['libgst*.dll', 'libgst*.dylib', 'libgst*.so']:
+        pattern = os.path.join(plugin_path, pattern)
+        binaries += [(f, os.path.join(GST_PLUGINS_DIR)) for f in glob.glob(pattern)]
+
+    return binaries
+
+
 a = Analysis(['../testapp/main.py'],
              pathex=['.'],
-             binaries=[],
+             binaries=get_gst_plugin_binaries(),
              datas=[],
              #hiddenimports=[],
              hookspath=hookspath(),
