@@ -12,7 +12,11 @@ class MainWindow(Widget):
     filename = StringProperty(sys.argv[1])
 
     def play_sound(self):
+        if getattr(sys, 'frozen', False):
+            os.environ['GST_PLUGIN_PATH'] = os.path.join(sys._MEIPASS, 'gst-plugins')
+
         print(json.dumps(dict(os.environ), indent=4, sort_keys=True))
+
         sound = SoundLoader.load(self.filename)
         sound.play()
 
