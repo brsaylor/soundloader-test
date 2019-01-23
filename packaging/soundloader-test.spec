@@ -4,6 +4,7 @@ import glob
 import os.path
 import re
 import subprocess
+from PyInstaller.depend import bindepend
 
 block_cipher = None
 from kivy.tools.packaging.pyinstaller_hooks import get_deps_all, hookspath, runtime_hooks
@@ -34,14 +35,25 @@ def get_gst_plugin_binaries():
     binaries = []
     for pattern in ['libgst*.dll', 'libgst*.dylib', 'libgst*.so']:
         pattern = os.path.join(plugin_path, pattern)
-        binaries += [(f, os.path.join(GST_PLUGINS_DIR)) for f in glob.glob(pattern)]
+        binaries += [(f, GST_PLUGINS_DIR) for f in glob.glob(pattern)]
 
     return binaries
 
+def get_gst_binaries():
+    plugin_binaries = get_gst_plugin_binaries()
+
+    lib_paths = set()
+    for plugin_filepath, _ in plugin_binaries:
+        plugin_deps = bindepend.selectImports(plugin_filepath)
+        lib_paths.update([lib_path for _, lib_path in plugin_deps])
+
+    lib_binaries = [(f, '.') for f in lib_paths]
+
+    return plugin_binaries + lib_binaries
 
 a = Analysis(['../testapp/main.py'],
              pathex=['.'],
-             binaries=get_gst_plugin_binaries(),
+             binaries=get_gst_binaries(),
              datas=[],
              #hiddenimports=[],
              hookspath=hookspath(),
