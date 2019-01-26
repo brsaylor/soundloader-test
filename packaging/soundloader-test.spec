@@ -13,11 +13,10 @@ from kivy.tools.packaging.pyinstaller_hooks import get_deps_all, hookspath, runt
 def find_gst_plugin_path():
     p = subprocess.Popen(
         ['gst-inspect-1.0', 'coreelements'],
-        stdout=subprocess.PIPE,
-        universal_newlines=True)
+        stdout=subprocess.PIPE)
     (stdoutdata, stderrdata) = p.communicate()
 
-    match = re.search(r'^\s*Filename\s+(\S+)', stdoutdata, re.MULTILINE)
+    match = re.search(r'\s+(\S+libgstcoreelements\.\S+)', stdoutdata)
 
     if not match:
         raise Exception('could not find GStreamer plugins')
@@ -28,9 +27,7 @@ def find_gst_plugin_path():
 def find_gst_binaries():
     plugin_path = find_gst_plugin_path()
 
-    plugin_filepaths = []
-    for pattern in ['libgst*.dll', 'libgst*.dylib', 'libgst*.so']:
-        plugin_filepaths += glob.glob(os.path.join(plugin_path, pattern))
+    plugin_filepaths = glob.glob(os.path.join(plugin_path, 'libgst*'))
 
     lib_filepaths = set()
     for plugin_filepath in plugin_filepaths:
