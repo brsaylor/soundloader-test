@@ -1,6 +1,13 @@
 #:kivy 1.10.1
 
 <MainWindow>:
-    Button:
-        text: "Play sound " + root.filename
-        on_press: root.play_sound()
+    BoxLayout:
+        orientation: 'vertical'
+        width: root.width
+
+        TextInput:
+            text: root.filename
+            on_text: root.filename = self.text
+        Button:
+            text: "Play"
+            on_press: root.play_sound()
